@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Opas: Yhdistä Google Analytics ja Search Console AI-assistenttiin</title>
+  <style>
+    :root {
+      --bg: #0d1117;
+      --surface: #161b22;
+      --surface-2: #1c2333;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text-muted: #8b949e;
+      --accent: #58a6ff;
+      --accent-dim: #1f3a5f;
+      --green: #3fb950;
+      --green-dim: #1a3a2a;
+      --orange: #d29922;
+      --orange-dim: #3d2e00;
+      --red: #f85149;
+      --code-bg: #0d1117;
+      --code-border: #262c36;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+      font-size: 16px;
+    }
+
+    .container {
+      max-width: 780px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem 4rem;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 3rem 0 2.5rem;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 3rem;
+    }
+
+    .header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 0.75rem;
+      background: linear-gradient(135deg, var(--accent), var(--green));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header .subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+    }
+
+    .badge-row {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: center;
+      margin-top: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.3rem 0.75rem;
+      border-radius: 100px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+    }
+
+    .badge .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .badge .dot.blue { background: var(--accent); }
+    .badge .dot.green { background: var(--green); }
+    .badge .dot.orange { background: var(--orange); }
+
+    /* Sections */
+    h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    h3 {
+      font-size: 1.15rem;
+      font-weight: 600;
+      margin: 2rem 0 0.75rem;
+      color: var(--accent);
+    }
+
+    h4 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 1.5rem 0 0.5rem;
+    }
+
+    p { margin-bottom: 1rem; }
+
+    strong { color: #fff; }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover { text-decoration: underline; }
+
+    /* Intro box */
+    .intro-box {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .intro-box p:last-child { margin-bottom: 0; }
+
+    .result-box {
+      background: var(--green-dim);
+      border: 1px solid #2ea04370;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .result-box::before {
+      content: 'Lopputulos';
+      display: block;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--green);
+      margin-bottom: 0.35rem;
+    }
+
+    /* Requirements */
+    .req-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.75rem;
+      margin: 1rem 0 1.5rem;
+    }
+
+    .req-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.85rem 1rem;
+    }
+
+    .req-item .label {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #fff;
+    }
+
+    .req-item .detail {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    /* Step cards */
+    .step {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin: 1.25rem 0;
+      position: relative;
+    }
+
+    .step-number {
+      position: absolute;
+      top: -10px;
+      left: 16px;
+      background: var(--accent);
+      color: #000;
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.15rem 0.6rem;
+      border-radius: 100px;
+    }
+
+    .step h4 {
+      margin-top: 0.25rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .step p:last-child { margin-bottom: 0; }
+
+    /* Part header */
+    .part-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin: 3rem 0 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .part-header .part-badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 0.75rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .part-header.green .part-badge {
+      background: var(--green-dim);
+      color: var(--green);
+    }
+
+    .part-header.orange .part-badge {
+      background: var(--orange-dim);
+      color: var(--orange);
+    }
+
+    .part-header h2 {
+      margin: 0;
+      padding: 0;
+      border: none;
+      font-size: 1.5rem;
+    }
+
+    /* Code blocks */
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--code-border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin: 0.75rem 0 1.25rem;
+      font-size: 0.88rem;
+      line-height: 1.6;
+    }
+
+    code {
+      font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', Consolas, monospace;
+      font-size: 0.88em;
+    }
+
+    p code, li code {
+      background: var(--surface-2);
+      border: 1px solid var(--code-border);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.85em;
+    }
+
+    pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: inherit;
+    }
+
+    .code-label {
+      display: inline-block;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.2rem 0.6rem;
+      border-radius: 6px 6px 0 0;
+      border: 1px solid var(--code-border);
+      border-bottom: none;
+      margin-bottom: -1px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .code-label + pre {
+      border-top-left-radius: 0;
+      margin-top: 0;
+    }
+
+    /* Test box */
+    .test-box {
+      background: var(--accent-dim);
+      border: 1px solid #58a6ff40;
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 1.25rem 0;
+    }
+
+    .test-box::before {
+      content: 'Testaa';
+      display: block;
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--accent);
+      margin-bottom: 0.35rem;
+    }
+
+    /* Lists */
+    ul, ol {
+      padding-left: 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    li { margin-bottom: 0.4rem; }
+
+    /* Tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin: 1rem 0 1.5rem;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+
+    th {
+      background: var(--surface-2);
+      font-weight: 600;
+      text-align: left;
+      padding: 0.7rem 1rem;
+      color: var(--text);
+      border-bottom: 1px solid var(--border);
+    }
+
+    td {
+      padding: 0.65rem 1rem;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    tr:last-child td { border-bottom: none; }
+
+    td:first-child { color: var(--text); }
+
+    /* Use cases section */
+    .use-case {
+      display: flex;
+      gap: 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem 1.25rem;
+      margin: 0.6rem 0;
+    }
+
+    .use-case .prompt {
+      flex: 1;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .use-case .desc {
+      flex: 1;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    /* Troubleshooting */
+    .trouble-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1.25rem 1.5rem;
+      margin: 0.75rem 0;
+    }
+
+    .trouble-item h4 {
+      margin: 0 0 0.5rem;
+      color: var(--orange);
+    }
+
+    .trouble-item ul { margin-bottom: 0; }
+
+    /* Note / Warning */
+    .note {
+      background: var(--surface);
+      border-left: 3px solid var(--accent);
+      padding: 0.85rem 1.25rem;
+      border-radius: 0 8px 8px 0;
+      margin: 1rem 0;
+      font-size: 0.92rem;
+      color: var(--text-muted);
+    }
+
+    /* Summary table */
+    .summary-table td:first-child {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .summary-table td:nth-child(2) { color: var(--green); }
+    .summary-table td:nth-child(3) { color: var(--orange); }
+
+    /* Footer */
+    .footer {
+      margin-top: 4rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border);
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+
+    .footer .author {
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .container { padding: 1.25rem 1rem 3rem; }
+      .header h1 { font-size: 1.5rem; }
+      .req-grid { grid-template-columns: 1fr; }
+      .use-case { flex-direction: column; gap: 0.25rem; }
+      h2 { font-size: 1.3rem; }
+    }
+
+    /* Syntax highlighting */
+    .kw { color: #ff7b72; }
+    .str { color: #a5d6ff; }
+    .cm { color: #8b949e; }
+    .fn { color: #d2a8ff; }
+    .num { color: #79c0ff; }
+    .key { color: #7ee787; }
+  </style>
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <div class="header">
+      <h1>Yhdistä Google Analytics ja Search Console AI-assistenttiin</h1>
+      <p class="subtitle">Claude Code + MCP &mdash; käytännön opas</p>
+      <div class="badge-row">
+        <span class="badge"><span class="dot green"></span> GSC ~5 min</span>
+        <span class="badge"><span class="dot orange"></span> GA4 ~20 min</span>
+        <span class="badge"><span class="dot blue"></span> MCP-protokolla</span>
+      </div>
+    </div>
+
+    <!-- Intro -->
+    <div class="intro-box">
+      <p>Tässä oppaassa yhdistämme <strong>Google Search Consolen</strong> (GSC) ja <strong>Google Analytics 4:n</strong> (GA4) suoraan <strong>Claude Codeen</strong> &mdash; Anthropicin AI-koodausassistenttiin, joka toimii terminaalissa.</p>
+      <p>Yhteys tapahtuu <strong>MCP-protokollalla</strong> (Model Context Protocol). Se on avoin standardi, joka antaa AI:lle mahdollisuuden kutsua ulkoisia työkaluja reaaliajassa.</p>
+    </div>
+
+    <div class="result-box">
+      Voit kysyä AI:lta esim. "Mitkä sivut saivat eniten klikkauksia viimeisen kuukauden aikana?" &mdash; ja saat vastauksen suoraan, ilman manuaalista datan kopiointia.
+    </div>
+
+    <!-- Requirements -->
+    <h2>Vaatimukset</h2>
+    <div class="req-grid">
+      <div class="req-item">
+        <div class="label">Claude Code</div>
+        <div class="detail"><code>npm install -g @anthropic-ai/claude-code</code></div>
+      </div>
+      <div class="req-item">
+        <div class="label">Node.js</div>
+        <div class="detail">Versio 18 tai uudempi</div>
+      </div>
+      <div class="req-item">
+        <div class="label">Google-tili</div>
+        <div class="detail">Pääsy GSC:hen ja GA4:ään</div>
+      </div>
+      <div class="req-item">
+        <div class="label">gcloud CLI</div>
+        <div class="detail">Tarvitaan GA4-yhteyttä varten</div>
+      </div>
+    </div>
+
+    <!-- Part 1: GSC -->
+    <div class="part-header green">
+      <span class="part-badge">OSA 1</span>
+      <h2>Google Search Console</h2>
+    </div>
+
+    <p>GSC-yhteys on helpompi, koska sille on valmis MCP-paketti.</p>
+
+    <div class="step">
+      <span class="step-number">1</span>
+      <h4>Asenna paketti</h4>
+      <pre><code>npm install -g google-searchconsole-mcp</code></pre>
+    </div>
+
+    <div class="step">
+      <span class="step-number">2</span>
+      <h4>Lisää MCP-konfiguraatio</h4>
+      <p>Avaa (tai luo) tiedosto <code>~/.claude/.mcp.json</code> ja lisää:</p>
+      <pre><code>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"google-search-console"</span>: {
+      <span class="key">"command"</span>: <span class="str">"google-searchconsole-mcp"</span>,
+      <span class="key">"args"</span>: [],
+      <span class="key">"env"</span>: {}
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="step">
+      <span class="step-number">3</span>
+      <h4>Käynnistä Claude Code</h4>
+      <pre><code>claude</code></pre>
+      <p>Ensimmäisellä kerralla GSC-paketti pyytää OAuth-kirjautumista. Selain avautuu, kirjaudut Google-tililläsi, ja yhteys on valmis.</p>
+    </div>
+
+    <div class="test-box">
+      Kirjoita Claude Codessa: <code>Listaa kaikki Search Console -sivustoni</code><br>
+      Jos näet sivustosi listan, GSC-yhteys toimii.
+    </div>
+
+    <!-- Part 2: GA4 -->
+    <div class="part-header orange">
+      <span class="part-badge">OSA 2</span>
+      <h2>Google Analytics 4</h2>
+    </div>
+
+    <p>GA4-yhteys on monimutkaisempi. Useimmat valmiit GA4 MCP -paketit vaativat <strong>service account JSON -avaimen</strong>. Jos organisaatiosi estää avainten luonnin (kuten monissa yrityksissä), tarvitset vaihtoehtoisen tavan.</p>
+    <p>Tässä käytämme <strong>Application Default Credentials (ADC)</strong> -menetelmää ja custom MCP-serveriä.</p>
+
+    <div class="step">
+      <span class="step-number">1</span>
+      <h4>Asenna ja konfiguroi gcloud CLI</h4>
+      <span class="code-label">Windows (PowerShell)</span>
+      <pre><code>winget install Google.CloudSDK</code></pre>
+      <span class="code-label">macOS</span>
+      <pre><code>brew install google-cloud-sdk</code></pre>
+      <span class="code-label">Linux</span>
+      <pre><code>curl https://sdk.cloud.google.com | bash</code></pre>
+      <p>Kirjaudu sisään:</p>
+      <pre><code>gcloud auth application-default login</code></pre>
+      <p>Selain avautuu. Kirjaudu Google-tililläsi ja hyväksy oikeudet. Tunnukset tallentuvat paikallisesti.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-number">2</span>
+      <h4>Ota Analytics API käyttöön</h4>
+      <p>Mene <a href="https://console.cloud.google.com/apis/library/analyticsdata.googleapis.com">Google Cloud Consoleen</a> ja ota <strong>Google Analytics Data API</strong> käyttöön projektillesi.</p>
+    </div>
+
+    <div class="step">
+      <span class="step-number">3</span>
+      <h4>Selvitä GA4 Property ID</h4>
+      <ol>
+        <li>Avaa <a href="https://analytics.google.com">Google Analytics</a></li>
+        <li>Mene <strong>Admin</strong> &rarr; <strong>Property Settings</strong></li>
+        <li>Kopioi <strong>Property ID</strong> (pelkkä numero, esim. <code>123456789</code>)</li>
+      </ol>
+    </div>
+
+    <div class="step">
+      <span class="step-number">4</span>
+      <h4>Luo custom MCP-serveri</h4>
+      <p>Luo kansio ja asenna riippuvuudet:</p>
+      <pre><code>mkdir -p ~/.claude/mcp-servers/ga4
+cd ~/.claude/mcp-servers/ga4
+npm init -y
+npm install @google-analytics/data @modelcontextprotocol/sdk zod</code></pre>
+      <p>Avaa <code>package.json</code> ja lisää kenttä <code>"type": "module"</code> ylätasolle (esim. <code>"name"</code>-kentän jälkeen):</p>
+      <pre><code>{
+  <span class="key">"name"</span>: <span class="str">"ga4"</span>,
+  <span class="key">"type"</span>: <span class="str">"module"</span>,
+  ...
+}</code></pre>
+      <p>Luo tiedosto <code>index.js</code>:</p>
+      <pre><code><span class="kw">import</span> { BetaAnalyticsDataClient } <span class="kw">from</span> <span class="str">"@google-analytics/data"</span>;
+<span class="kw">import</span> { McpServer } <span class="kw">from</span> <span class="str">"@modelcontextprotocol/sdk/server/mcp.js"</span>;
+<span class="kw">import</span> { StdioServerTransport } <span class="kw">from</span> <span class="str">"@modelcontextprotocol/sdk/server/stdio.js"</span>;
+<span class="kw">import</span> { z } <span class="kw">from</span> <span class="str">"zod"</span>;
+
+<span class="kw">const</span> analyticsDataClient = <span class="kw">new</span> <span class="fn">BetaAnalyticsDataClient</span>();
+<span class="kw">const</span> PROPERTY_ID = process.env.GA4_PROPERTY_ID || <span class="str">"VAIHDA_OMA_ID"</span>;
+
+<span class="kw">const</span> server = <span class="kw">new</span> <span class="fn">McpServer</span>({
+  name: <span class="str">"google-analytics"</span>,
+  version: <span class="str">"1.0.0"</span>,
+});
+
+<span class="cm">// Työkalu: Aja GA4-raportti</span>
+server.<span class="fn">tool</span>(
+  <span class="str">"ga4_run_report"</span>,
+  <span class="str">"Run a GA4 report with custom dimensions and metrics"</span>,
+  {
+    dateRangeStart: z.<span class="fn">string</span>().<span class="fn">describe</span>(<span class="str">"Start date (YYYY-MM-DD or 'NdaysAgo')"</span>),
+    dateRangeEnd: z.<span class="fn">string</span>().<span class="fn">describe</span>(<span class="str">"End date (YYYY-MM-DD or 'today')"</span>),
+    metrics: z.<span class="fn">array</span>(z.<span class="fn">string</span>()).<span class="fn">describe</span>(<span class="str">"e.g. ['sessions','screenPageViews']"</span>),
+    dimensions: z.<span class="fn">array</span>(z.<span class="fn">string</span>()).<span class="fn">optional</span>(),
+    limit: z.<span class="fn">number</span>().<span class="fn">optional</span>(),
+  },
+  <span class="kw">async</span> ({ dateRangeStart, dateRangeEnd, metrics, dimensions, limit }) => {
+    <span class="kw">const</span> request = {
+      property: <span class="str">`properties/${PROPERTY_ID}`</span>,
+      dateRanges: [{ startDate: dateRangeStart, endDate: dateRangeEnd }],
+      metrics: metrics.<span class="fn">map</span>((m) => ({ name: m })),
+      dimensions: (dimensions || []).<span class="fn">map</span>((d) => ({ name: d })),
+      limit: limit || <span class="num">10</span>,
+    };
+    <span class="kw">const</span> [response] = <span class="kw">await</span> analyticsDataClient.<span class="fn">runReport</span>(request);
+    <span class="kw">const</span> headers = [
+      ...(response.dimensionHeaders || []).<span class="fn">map</span>((h) => h.name),
+      ...(response.metricHeaders || []).<span class="fn">map</span>((h) => h.name),
+    ];
+    <span class="kw">const</span> rows = (response.rows || []).<span class="fn">map</span>((row) => [
+      ...(row.dimensionValues || []).<span class="fn">map</span>((v) => v.value),
+      ...(row.metricValues || []).<span class="fn">map</span>((v) => v.value),
+    ]);
+    <span class="kw">return</span> {
+      content: [{ type: <span class="str">"text"</span>, text: JSON.<span class="fn">stringify</span>({ headers, rows }, <span class="kw">null</span>, <span class="num">2</span>) }],
+    };
+  }
+);
+
+<span class="cm">// Työkalu: Top-sivut</span>
+server.<span class="fn">tool</span>(
+  <span class="str">"ga4_top_pages"</span>,
+  <span class="str">"Get top pages by sessions (last 28 days)"</span>,
+  { limit: z.<span class="fn">number</span>().<span class="fn">optional</span>() },
+  <span class="kw">async</span> ({ limit }) => {
+    <span class="kw">const</span> [response] = <span class="kw">await</span> analyticsDataClient.<span class="fn">runReport</span>({
+      property: <span class="str">`properties/${PROPERTY_ID}`</span>,
+      dateRanges: [{ startDate: <span class="str">"28daysAgo"</span>, endDate: <span class="str">"today"</span> }],
+      metrics: [{ name: <span class="str">"sessions"</span> }, { name: <span class="str">"screenPageViews"</span> }],
+      dimensions: [{ name: <span class="str">"pagePath"</span> }],
+      orderBys: [{ metric: { metricName: <span class="str">"sessions"</span> }, desc: <span class="kw">true</span> }],
+      limit: limit || <span class="num">10</span>,
+    });
+    <span class="kw">const</span> rows = (response.rows || []).<span class="fn">map</span>((row) => ({
+      page: row.dimensionValues[<span class="num">0</span>].value,
+      sessions: row.metricValues[<span class="num">0</span>].value,
+      pageViews: row.metricValues[<span class="num">1</span>].value,
+    }));
+    <span class="kw">return</span> { content: [{ type: <span class="str">"text"</span>, text: JSON.<span class="fn">stringify</span>(rows, <span class="kw">null</span>, <span class="num">2</span>) }] };
+  }
+);
+
+<span class="cm">// Työkalu: Reaaliaikainen data</span>
+server.<span class="fn">tool</span>(
+  <span class="str">"ga4_realtime"</span>,
+  <span class="str">"Get real-time active users and top pages"</span>,
+  {},
+  <span class="kw">async</span> () => {
+    <span class="kw">const</span> [response] = <span class="kw">await</span> analyticsDataClient.<span class="fn">runRealtimeReport</span>({
+      property: <span class="str">`properties/${PROPERTY_ID}`</span>,
+      metrics: [{ name: <span class="str">"activeUsers"</span> }],
+      dimensions: [{ name: <span class="str">"unifiedScreenName"</span> }],
+      limit: <span class="num">10</span>,
+    });
+    <span class="kw">const</span> rows = (response.rows || []).<span class="fn">map</span>((row) => ({
+      page: row.dimensionValues[<span class="num">0</span>].value,
+      activeUsers: row.metricValues[<span class="num">0</span>].value,
+    }));
+    <span class="kw">return</span> { content: [{ type: <span class="str">"text"</span>, text: JSON.<span class="fn">stringify</span>(rows, <span class="kw">null</span>, <span class="num">2</span>) }] };
+  }
+);
+
+<span class="kw">const</span> transport = <span class="kw">new</span> <span class="fn">StdioServerTransport</span>();
+<span class="kw">await</span> server.<span class="fn">connect</span>(transport);</code></pre>
+    </div>
+
+    <div class="step">
+      <span class="step-number">5</span>
+      <h4>Lisää GA4-serveri MCP-konfiguraatioon</h4>
+      <p>Päivitä <code>~/.claude/.mcp.json</code>:</p>
+      <pre><code>{
+  <span class="key">"mcpServers"</span>: {
+    <span class="key">"google-search-console"</span>: {
+      <span class="key">"command"</span>: <span class="str">"google-searchconsole-mcp"</span>,
+      <span class="key">"args"</span>: [],
+      <span class="key">"env"</span>: {}
+    },
+    <span class="key">"google-analytics"</span>: {
+      <span class="key">"command"</span>: <span class="str">"node"</span>,
+      <span class="key">"args"</span>: [<span class="str">"C:/Users/KÄYTTÄJÄNIMI/.claude/mcp-servers/ga4/index.js"</span>],
+      <span class="key">"env"</span>: {
+        <span class="key">"GA4_PROPERTY_ID"</span>: <span class="str">"VAIHDA_OMA_PROPERTY_ID"</span>
+      }
+    }
+  }
+}</code></pre>
+      <div class="note">
+        Vaihda <code>KÄYTTÄJÄNIMI</code> ja <code>GA4_PROPERTY_ID</code> omiisi.
+      </div>
+    </div>
+
+    <div class="step">
+      <span class="step-number">6</span>
+      <h4>Käynnistä Claude Code uudelleen</h4>
+      <pre><code>claude</code></pre>
+    </div>
+
+    <div class="test-box">
+      Kirjoita Claude Codessa: <code>Näytä top 10 sivua viimeisen 28 päivän ajalta</code><br>
+      Jos näet sivulistan sessio- ja katselumäärineen, GA4-yhteys toimii.
+    </div>
+
+    <!-- Part 3: Use cases -->
+    <div class="part-header">
+      <span class="part-badge">OSA 3</span>
+      <h2>Mitä tällä voi tehdä?</h2>
+    </div>
+
+    <p>Kun molemmat yhteydet toimivat, voit pyytää AI:ta tekemään analyysejä jotka normaalisti vaatisivat manuaalista työtä:</p>
+
+    <div class="use-case">
+      <div class="prompt">"Top 10 sivua orgaanisesta hausta"</div>
+      <div class="desc">Hakee GSC-datan ja listaa parhaat sivut</div>
+    </div>
+    <div class="use-case">
+      <div class="prompt">"Vertaa tammikuun ja helmikuun liikennettä"</div>
+      <div class="desc">Ajaa kaksi GA4-raporttia ja vertailee tuloksia</div>
+    </div>
+    <div class="use-case">
+      <div class="prompt">"Avainsanat joilla CTR on alle 3%?"</div>
+      <div class="desc">GSC-analyysi, löytää optimointimahdollisuudet</div>
+    </div>
+    <div class="use-case">
+      <div class="prompt">"Onko sivustolla reaaliaikaista liikennettä?"</div>
+      <div class="desc">GA4 realtime -raportti sekunneissa</div>
+    </div>
+    <div class="use-case">
+      <div class="prompt">"Yhteenveto viimeisen kuukauden SEO-datasta"</div>
+      <div class="desc">Yhdistää GSC + GA4 datan samassa vastauksessa</div>
+    </div>
+
+    <div class="result-box">
+      AI osaa yhdistää molempien lähteiden dataa samassa vastauksessa. Sinun ei tarvitse vaihtaa välilehtien välillä.
+    </div>
+
+    <!-- Troubleshooting -->
+    <h2>Vianmääritys</h2>
+
+    <div class="trouble-item">
+      <h4>GSC ei toimi</h4>
+      <ul>
+        <li>Poista OAuth-token ja kirjaudu uudelleen</li>
+        <li>Tarkista asennus: <code>npm list -g google-searchconsole-mcp</code></li>
+      </ul>
+    </div>
+
+    <div class="trouble-item">
+      <h4>GA4 ei toimi</h4>
+      <ul>
+        <li><strong>Yleisin syy:</strong> gcloud-tunnukset vanhentuneet &mdash; aja <code>gcloud auth application-default login</code></li>
+        <li>Tarkista että Analytics Data API on käytössä Google Cloud Consolessa</li>
+        <li>Property ID pitää olla pelkkä numero, ei <code>UA-</code> alkuinen</li>
+      </ul>
+    </div>
+
+    <div class="trouble-item">
+      <h4>MCP-serveri ei lataudu</h4>
+      <ul>
+        <li>Käynnistä Claude Code uudelleen (<code>/exit</code> ja <code>claude</code>)</li>
+        <li>Tarkista <code>.mcp.json</code> -syntaksi JSON-validaattorilla</li>
+        <li>Testaa manuaalisesti: <code>node ~/.claude/mcp-servers/ga4/index.js</code></li>
+      </ul>
+    </div>
+
+    <!-- Summary table -->
+    <h2>Yhteenveto</h2>
+
+    <div class="table-wrap">
+      <table class="summary-table">
+        <thead>
+          <tr>
+            <th></th>
+            <th>GSC</th>
+            <th>GA4</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Vaikeus</td>
+            <td>Helppo</td>
+            <td>Keskivaikea</td>
+          </tr>
+          <tr>
+            <td>Auth</td>
+            <td>OAuth (automaattinen)</td>
+            <td>ADC (gcloud CLI)</td>
+          </tr>
+          <tr>
+            <td>Paketti</td>
+            <td>Valmis npm-paketti</td>
+            <td>Custom MCP-serveri</td>
+          </tr>
+          <tr>
+            <td>Setupaika</td>
+            <td>~5 min</td>
+            <td>~20 min</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p>Kun setup on kerran tehty, se toimii jatkossa automaattisesti. Ainoa ylläpito on satunnainen tunnusten uusiminen (<code>gcloud auth application-default login</code>).</p>
+
+    <!-- Footer -->
+    <div class="footer">
+      <p class="author">Joni Nykänen</p>
+      <p>Kysymyksiä? Laita viestiä LinkedInissä.</p>
+    </div>
+
+  </div>
+</body>
+</html>
